@@ -1,0 +1,8 @@
+{
+  "intervalo_min": 20,
+  "intervalo_max": 90,
+  "modo_suspensao": true,
+  "suspensao_apos": 40,
+  "suspensao_min": 900,
+  "suspensao_max": 1800
+}
