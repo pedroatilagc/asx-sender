@@ -6,37 +6,19 @@ from rest_framework.response import Response
 from .models import Dispositivo
 from .serializers import DispositivoSerializer
 
-EVOLUTION_URL = settings.EVOLUTION_API_URL
-EVOLUTION_KEY = settings.EVOLUTION_API_KEY
-HEADERS = {
-    'apikey': EVOLUTION_KEY,
+UAZAPI_URL   = settings.UAZAPI_URL
+ADMIN_TOKEN  = settings.UAZAPI_ADMIN_TOKEN
+ADMIN_HEADERS = {
+    'admintoken': ADMIN_TOKEN,
     'Content-Type': 'application/json',
 }
 
 
-def _evo_post(path, data=None):
-    return requests.post(
-        f'{EVOLUTION_URL}{path}',
-        json=data or {},
-        headers=HEADERS,
-        timeout=15,
-    )
-
-
-def _evo_get(path):
-    return requests.get(
-        f'{EVOLUTION_URL}{path}',
-        headers=HEADERS,
-        timeout=15,
-    )
-
-
-def _evo_delete(path):
-    return requests.delete(
-        f'{EVOLUTION_URL}{path}',
-        headers=HEADERS,
-        timeout=15,
-    )
+def _instance_headers(token):
+    return {
+        'token': token,
+        'Content-Type': 'application/json',
+    }
 
 
 class DispositivoViewSet(viewsets.ModelViewSet):
@@ -44,7 +26,7 @@ class DispositivoViewSet(viewsets.ModelViewSet):
     serializer_class = DispositivoSerializer
 
     def create(self, request, *args, **kwargs):
-        nome          = request.data.get('nome', '').strip()
+        nome = request.data.get('nome', '').strip()
         instance_name = request.data.get('instance_name', '').strip()
 
         if not nome or not instance_name:
@@ -54,26 +36,31 @@ class DispositivoViewSet(viewsets.ModelViewSet):
             )
 
         try:
-            evo_res = _evo_post('/instance/create', {
-                'instanceName': instance_name,
-                'qrcode': True,
-                'integration': 'WHATSAPP-BAILEYS',
-            })
+            res = requests.post(
+                f'{UAZAPI_URL}/instance/create',
+                json={'name': instance_name},
+                headers=ADMIN_HEADERS,
+                timeout=15,
+            )
         except requests.exceptions.ConnectionError:
             return Response(
-                {'error': 'Não foi possível conectar ao Evolution API. Verifique se está rodando.'},
+                {'error': 'Não foi possível conectar à uazapi. Verifique se está online.'},
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
 
-        if evo_res.status_code not in [200, 201]:
+        if res.status_code not in [200, 201]:
             return Response(
-                {'error': f'Evolution API retornou erro: {evo_res.text}'},
+                {'error': f'uazapi retornou erro: {res.text}'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+        data  = res.json()
+        token = data.get('token') or data.get('instance', {}).get('token', '')
 
         dispositivo = Dispositivo.objects.create(
             nome=nome,
             instance_name=instance_name,
+            instance_token=token,
             status='connecting',
         )
 
@@ -84,9 +71,13 @@ class DispositivoViewSet(viewsets.ModelViewSet):
         dispositivo = self.get_object()
 
         try:
-            _evo_delete(f'/instance/delete/{dispositivo.instance_name}')
+            requests.delete(
+                f'{UAZAPI_URL}/instance',
+                headers=_instance_headers(dispositivo.instance_token),
+                timeout=15,
+            )
         except requests.exceptions.ConnectionError:
-            pass  # Remove do banco mesmo se Evolution API estiver offline
+            pass
 
         dispositivo.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -96,41 +87,59 @@ class DispositivoViewSet(viewsets.ModelViewSet):
         dispositivo = self.get_object()
 
         try:
-            evo_res = _evo_get(f'/instance/connect/{dispositivo.instance_name}')
+            res = requests.post(
+                f'{UAZAPI_URL}/instance/connect',
+                json={},
+                headers=_instance_headers(dispositivo.instance_token),
+                timeout=15,
+            )
         except requests.exceptions.ConnectionError:
             return Response(
-                {'error': 'Evolution API indisponível.'},
+                {'error': 'uazapi indisponível.'},
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
 
-        if evo_res.status_code != 200:
+        if res.status_code != 200:
             return Response(
                 {'error': 'Não foi possível obter o QR Code.'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        return Response(evo_res.json())
+        data = res.json()
+        qr = data.get('instance', {}).get('qrcode') or data.get('qrcode', '')
+
+        return Response({'base64': qr})
 
     @action(detail=True, methods=['get'], url_path='status')
     def status_conexao(self, request, pk=None):
         dispositivo = self.get_object()
 
         try:
-            evo_res = _evo_get(f'/instance/connectionState/{dispositivo.instance_name}')
+            res = requests.get(
+                f'{UAZAPI_URL}/instance/status',
+                headers=_instance_headers(dispositivo.instance_token),
+                timeout=15,
+            )
         except requests.exceptions.ConnectionError:
             return Response(
-                {'error': 'Evolution API indisponível.'},
+                {'error': 'uazapi indisponível.'},
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
 
-        if evo_res.status_code != 200:
+        if res.status_code != 200:
             return Response({'status': 'desconhecido'})
 
-        data        = evo_res.json()
-        novo_status = data.get('instance', {}).get('state', 'close')
-        numero      = data.get('instance', {}).get('profileName', '')
+        data   = res.json()
+        inst   = data.get('instance', {})
+        estado = inst.get('status', 'disconnected')
+        numero = inst.get('profileName', '') or inst.get('owner', '')
 
-        dispositivo.status = novo_status
+        mapa_status = {
+            'connected':    'open',
+            'connecting':   'connecting',
+            'disconnected': 'close',
+        }
+        dispositivo.status = mapa_status.get(estado, 'close')
         if numero:
             dispositivo.numero = numero
         dispositivo.save()
@@ -140,29 +149,29 @@ class DispositivoViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'], url_path='sincronizar')
     def sincronizar(self, request):
-        try:
-            evo_res = _evo_get('/instance/fetchInstances')
-        except requests.exceptions.ConnectionError:
-            return Response(
-                {'error': 'Evolution API indisponível.'},
-                status=status.HTTP_503_SERVICE_UNAVAILABLE,
-            )
-
-        if evo_res.status_code != 200:
-            return Response({'error': 'Erro ao buscar instâncias.'}, status=400)
-
-        instancias = evo_res.json()
-
-        for inst in instancias:
-            instance_name = inst.get('instance', {}).get('instanceName') or inst.get('instanceName', '')
-            estado        = inst.get('instance', {}).get('state') or inst.get('connectionStatus', 'close')
-            numero        = inst.get('instance', {}).get('profileName', '')
-
-            if instance_name:
-                Dispositivo.objects.filter(instance_name=instance_name).update(
-                    status=estado,
-                    numero=numero or '',
+        for dispositivo in Dispositivo.objects.all():
+            try:
+                res = requests.get(
+                    f'{UAZAPI_URL}/instance/status',
+                    headers=_instance_headers(dispositivo.instance_token),
+                    timeout=15,
                 )
+                if res.status_code == 200:
+                    data   = res.json()
+                    inst   = data.get('instance', {})
+                    estado = inst.get('status', 'disconnected')
+                    mapa_status = {
+                        'connected':    'open',
+                        'connecting':   'connecting',
+                        'disconnected': 'close',
+                    }
+                    dispositivo.status = mapa_status.get(estado, 'close')
+                    numero = inst.get('profileName', '') or inst.get('owner', '')
+                    if numero:
+                        dispositivo.numero = numero
+                    dispositivo.save()
+            except requests.exceptions.ConnectionError:
+                continue
 
         serializer = self.get_serializer(Dispositivo.objects.all(), many=True)
         return Response(serializer.data)

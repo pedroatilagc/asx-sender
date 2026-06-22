@@ -7,4 +7,5 @@ urlpatterns = [
     path('api/campanhas/', include('campanhas.urls')),
     path('api/modelos/', include('modelos.urls')),
     path('api/contatos/', include('contatos.urls')),
+    path('api/mensagens/', include('mensagens.urls')),
 ]

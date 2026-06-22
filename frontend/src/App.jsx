@@ -5,6 +5,7 @@ import Campanhas from './pages/Campanhas'
 import Modelos from './pages/Modelos'
 import Contatos from './pages/Contatos'
 import Relatorios from './pages/Relatorios'
+import Mensagens from './pages/Mensagens'
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
         <Route path="/modelos" element={<Modelos />} />
         <Route path="/contatos" element={<Contatos />} />
         <Route path="/relatorios" element={<Relatorios />} />
+        <Route path="/mensagens" element={<Mensagens />} />
       </Routes>
     </Layout>
   )

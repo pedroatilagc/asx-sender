@@ -26,6 +26,7 @@ from django.conf import settings
 EVOLUTION_URL = settings.EVOLUTION_API_URL
 EVOLUTION_KEY = settings.EVOLUTION_API_KEY
 HEADERS = {'apikey': EVOLUTION_KEY, 'Content-Type': 'application/json'}
+UAZAPI_URL_CAMPANHAS = settings.UAZAPI_URL
 
 # Controle de threads por campanha
 _threads = {}
@@ -42,7 +43,7 @@ def normalizar_numero(numero):
     return digitos
 
 
-def enviar_mensagem_evolution(instance_name, numero, mensagem, modelo=None):
+def enviar_mensagem_evolution_OLD(instance_name, numero, mensagem, modelo=None):
     try:
         # Mensagem com botões
         if modelo and modelo.tipo == 'botoes' and modelo.botoes:
@@ -97,6 +98,47 @@ def enviar_mensagem_evolution(instance_name, numero, mensagem, modelo=None):
         return False, str(e)
 
 
+def enviar_mensagem_uazapi(instance_token, numero, mensagem, modelo=None):
+    try:
+        if modelo and modelo.tipo == 'botoes' and modelo.botoes:
+            choices = []
+            for b in modelo.botoes:
+                tipo   = b.get('tipo', '')
+                titulo = b.get('titulo', '')
+                if tipo == 'url':
+                    choices.append(f"{titulo}|{b.get('url', '')}")
+                elif tipo == 'copiar':
+                    choices.append(f"{titulo}|copy:{b.get('codigo', '')}")
+                else:  # optout / reply
+                    choices.append(f"{titulo}|{titulo.lower().replace(' ', '_')}")
+
+            payload = {
+                'number':     numero,
+                'type':       'button',
+                'text':       mensagem,
+                'choices':    choices,
+                'footerText': modelo.rodape or 'ASX Sender',
+            }
+            res = requests.post(
+                f'{UAZAPI_URL_CAMPANHAS}/send/menu',
+                json=payload,
+                headers={'token': instance_token, 'Content-Type': 'application/json'},
+                timeout=30,
+            )
+        else:
+            payload = {'number': numero, 'text': mensagem}
+            res = requests.post(
+                f'{UAZAPI_URL_CAMPANHAS}/send/text',
+                json=payload,
+                headers={'token': instance_token, 'Content-Type': 'application/json'},
+                timeout=30,
+            )
+
+        return res.status_code in [200, 201], res.text
+    except Exception as e:
+        return False, str(e)
+
+
 def processar_campanha(campanha_id):
     try:
         campanha = Campanha.objects.get(id=campanha_id)
@@ -104,7 +146,8 @@ def processar_campanha(campanha_id):
         return
 
     config     = ler_config()
-    instancias = list(campanha.instancias.filter(status='open').values_list('instance_name', flat=True))
+    instancias_qs = campanha.instancias.filter(status='open')
+    instancias    = list(instancias_qs.values_list('instance_name', 'instance_token'))
 
     if not instancias:
         campanha.status = 'cancelada'
@@ -158,12 +201,12 @@ def processar_campanha(campanha_id):
         mensagem     = mensagem.replace('{{name}}', nome_contato).replace('{{nome}}', nome_contato)
 
         # Rotação round-robin de instâncias
-        instance_name     = instancias[idx_inst % len(instancias)]
-        idx_inst         += 1
+        instance_name, instance_token = instancias[idx_inst % len(instancias)]
+        idx_inst          += 1
         contato.instancia = instance_name
 
         modelo_obj = campanha.modelo if not campanha.mensagem_override else None
-        sucesso, resposta = enviar_mensagem_evolution(instance_name, contato.numero, mensagem, modelo=modelo_obj)
+        sucesso, resposta = enviar_mensagem_uazapi(instance_token, contato.numero, mensagem, modelo=modelo_obj)
 
         if sucesso:
             contato.status     = 'enviado'

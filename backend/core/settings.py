@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     'campanhas',
     'modelos',
     'contatos',
+    'mensagens',
 ]
 
 MIDDLEWARE = [
@@ -83,3 +84,5 @@ SUPABASE_URL = config('SUPABASE_URL')
 SUPABASE_KEY = config('SUPABASE_KEY')
 EVOLUTION_API_URL = config('EVOLUTION_API_URL')
 EVOLUTION_API_KEY = config('EVOLUTION_API_KEY')
+UAZAPI_URL = 'https://free.uazapi.com'
+UAZAPI_ADMIN_TOKEN = 'ZaW1qwTEkuq7Ub1cBUuyMiK5bNSu3nnMQ9lh7klElc2clSRV8t'

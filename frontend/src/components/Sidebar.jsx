@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
   IconDeviceMobile, IconSend, IconTemplate, IconUsers,
-  IconChartBar, IconChevronLeft, IconChevronRight,
+  IconChartBar, IconChevronLeft, IconChevronRight, IconMessageCircle,
 } from '@tabler/icons-react'
 import { stagger, staggerItem, sidebarV, sidebarLabelV } from '../lib/motion'
 
@@ -11,7 +11,8 @@ const navItems = [
   { path: '/campanhas',    label: 'Campanhas',     Icon: IconSend },
   { path: '/modelos',      label: 'Modelos',       Icon: IconTemplate },
   { path: '/contatos',     label: 'Contatos',      Icon: IconUsers },
-  { path: '/relatorios',   label: 'Relatórios',    Icon: IconChartBar },
+  { path: '/relatorios',   label: 'Relatórios',    Icon: IconChartBar      },
+  { path: '/mensagens',    label: 'Mensagens',     Icon: IconMessageCircle },
 ]
 
 export default function Sidebar({ collapsed, onToggle }) {

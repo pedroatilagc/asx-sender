@@ -8,10 +8,11 @@ class Dispositivo(models.Model):
         ('connecting', 'Conectando'),
     ]
 
-    nome          = models.CharField(max_length=100)
-    instance_name = models.CharField(max_length=100, unique=True)
-    numero        = models.CharField(max_length=20, blank=True)
-    status        = models.CharField(max_length=20, choices=STATUS_CHOICES, default='close')
+    nome           = models.CharField(max_length=100)
+    instance_name  = models.CharField(max_length=100, unique=True)
+    instance_token = models.CharField(max_length=200, blank=True, default='')
+    numero         = models.CharField(max_length=20, blank=True)
+    status         = models.CharField(max_length=20, choices=STATUS_CHOICES, default='close')
     criado_em     = models.DateTimeField(auto_now_add=True)
     atualizado_em = models.DateTimeField(auto_now=True)
 
