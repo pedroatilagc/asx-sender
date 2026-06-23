@@ -44,7 +44,7 @@ class DispositivoViewSet(viewsets.ModelViewSet):
             )
         except requests.exceptions.ConnectionError:
             return Response(
-                {'error': 'Não foi possível conectar à uazapi. Verifique se está online.'},
+                {'error': 'Não foi possível conectar à uazapi.'},
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
 
@@ -127,7 +127,10 @@ class DispositivoViewSet(viewsets.ModelViewSet):
             )
 
         if res.status_code != 200:
-            return Response({'status': 'desconhecido'})
+            dispositivo.status = 'close'
+            dispositivo.save()
+            serializer = self.get_serializer(dispositivo)
+            return Response(serializer.data)
 
         data   = res.json()
         inst   = data.get('instance', {})
@@ -170,7 +173,12 @@ class DispositivoViewSet(viewsets.ModelViewSet):
                     if numero:
                         dispositivo.numero = numero
                     dispositivo.save()
+                else:
+                    dispositivo.status = 'close'
+                    dispositivo.save()
             except requests.exceptions.ConnectionError:
+                dispositivo.status = 'close'
+                dispositivo.save()
                 continue
 
         serializer = self.get_serializer(Dispositivo.objects.all(), many=True)
