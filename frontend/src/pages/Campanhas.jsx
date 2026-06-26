@@ -10,10 +10,10 @@ import {
 import { fadeUp, stagger, staggerItem, toastV } from '../lib/motion'
 import ModalWrapper from '../components/ModalWrapper'
 
-const API      = 'http://localhost:8000/api/campanhas'
-const API_DISP = 'http://localhost:8000/api/dispositivos'
-const API_MOD  = 'http://localhost:8000/api/modelos'
-const API_CONF = 'http://localhost:8000/api/campanhas/configuracoes'
+const API      = `${import.meta.env.VITE_API_URL}/api/campanhas`
+const API_DISP = `${import.meta.env.VITE_API_URL}/api/dispositivos`
+const API_MOD  = `${import.meta.env.VITE_API_URL}/api/modelos`
+const API_CONF = `${import.meta.env.VITE_API_URL}/api/campanhas/configuracoes`
 
 function parseWhatsApp(texto) {
   if (!texto) return null

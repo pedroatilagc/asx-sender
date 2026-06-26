@@ -9,7 +9,7 @@ import {
 import { fadeUp, stagger, staggerItem, toastV } from '../lib/motion'
 import ModalWrapper from '../components/ModalWrapper'
 
-const API = 'http://localhost:8000/api/contatos'
+const API = `${import.meta.env.VITE_API_URL}/api/contatos`
 
 const formatarNumero = (num) => {
   if (!num || num.length < 12) return num || '—'

@@ -7,7 +7,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { pageV, toastV } from '../lib/motion'
 import { IconMessageCircle } from '@tabler/icons-react'
 
-const API_MENSAGENS = 'http://localhost:8000/api/mensagens'
+const API_MENSAGENS = `${import.meta.env.VITE_API_URL}/api/mensagens`
 
 export default function Layout({ children }) {
   const location   = useLocation()

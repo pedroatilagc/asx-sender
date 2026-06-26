@@ -7,7 +7,7 @@ import {
 } from '@tabler/icons-react'
 import { fadeUp, stagger, staggerItem } from '../lib/motion'
 
-const API = 'http://localhost:8000/api/mensagens'
+const API = `${import.meta.env.VITE_API_URL}/api/mensagens`
 
 function formatarNumero(num) {
   const n = String(num || '').replace(/\D/g, '')

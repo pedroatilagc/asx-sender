@@ -8,7 +8,7 @@ import {
 import { fadeUp, stagger, staggerItem } from '../lib/motion'
 import ModalWrapper from '../components/ModalWrapper'
 
-const API = 'http://localhost:8000/api/modelos'
+const API = `${import.meta.env.VITE_API_URL}/api/modelos`
 
 function parseWhatsApp(texto) {
   if (!texto) return null

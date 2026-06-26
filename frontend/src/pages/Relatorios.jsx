@@ -9,7 +9,7 @@ import {
 import { fadeUp, stagger, staggerItem, toastV } from '../lib/motion'
 import ModalWrapper from '../components/ModalWrapper'
 
-const API = 'http://localhost:8000/api/campanhas'
+const API = `${import.meta.env.VITE_API_URL}/api/campanhas`
 
 const STATUS_BADGE = {
   rascunho:  'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600',

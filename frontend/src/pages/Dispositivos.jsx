@@ -8,7 +8,7 @@ import {
 import { fadeUp, stagger, staggerItem, toastV } from '../lib/motion'
 import ModalWrapper from '../components/ModalWrapper'
 
-const API = 'http://localhost:8000/api/dispositivos'
+const API = `${import.meta.env.VITE_API_URL}/api/dispositivos`
 
 const statusConfig = {
   open:       { label: 'Conectado',    icon: IconWifi,    classes: 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800' },
