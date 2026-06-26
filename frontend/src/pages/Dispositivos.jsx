@@ -212,17 +212,21 @@ export default function Dispositivos() {
     } catch { alert('Erro ao excluir dispositivo.') }
   }
 
-  useEffect(() => { carregar() }, [])
+  useEffect(() => {
+    carregar()
+    const interval = setInterval(sincronizar, 30000)
+    return () => clearInterval(interval)
+  }, [])
 
   const conectados    = dispositivos.filter(d => d.status === 'open').length
   const desconectados = dispositivos.filter(d => d.status === 'close').length
   const conectando    = dispositivos.filter(d => d.status === 'connecting').length
 
   const kpis = [
-    { label: 'Total',         value: dispositivos.length, color: 'text-slate-700 dark:text-slate-200'  },
-    { label: 'Conectados',    value: conectados,          color: 'text-emerald-600 dark:text-emerald-400' },
-    { label: 'Desconectados', value: desconectados,       color: 'text-slate-400 dark:text-slate-500'  },
-    { label: 'Conectando',    value: conectando,          color: 'text-amber-500 dark:text-amber-400'  },
+    { label: 'Total',         value: dispositivos.length, color: 'text-slate-700 dark:text-slate-200' },
+    { label: 'Conectados',    value: conectados,          color: 'text-slate-700 dark:text-slate-200' },
+    { label: 'Desconectados', value: desconectados,       color: 'text-slate-700 dark:text-slate-200' },
+    { label: 'Conectando',    value: conectando,          color: 'text-slate-700 dark:text-slate-200' },
   ]
 
   return (

@@ -699,13 +699,17 @@ export default function Campanhas() {
                 )}
               </div>
 
-              {/* WhatsApp preview — mantém cores fixas intencionais */}
-              <div className="bg-[#0b141a] rounded-xl p-4">
-                <p className="text-[10px] text-gray-500 mb-3 text-center font-semibold uppercase tracking-widest">Pré-visualização</p>
+              {/* WhatsApp preview — dark theme no light mode, light theme no dark mode */}
+              <div className="bg-[#0b141a] dark:bg-[#E8E3D9] rounded-xl p-4 transition-colors duration-300">
+                <p className="text-[10px] text-gray-500 dark:text-[#7a7a7a] mb-3 text-center font-semibold uppercase tracking-widest">Pré-visualização</p>
                 <div className="flex flex-col items-end">
-                  <div className="bg-[#005c4b] text-white p-3 rounded-lg max-w-[240px] text-sm leading-relaxed">
+                  <div className="bg-[#005c4b] dark:bg-[#E2FFC8] text-white dark:text-[#1a1a1a] p-3 rounded-lg max-w-[240px] text-sm leading-relaxed shadow-sm transition-colors duration-300">
                     <div className="whitespace-pre-wrap break-words">
-                      {parseWhatsApp(textoFinal) || <span className="text-white/30 italic text-xs">Sua mensagem aparecerá aqui...</span>}
+                      {parseWhatsApp(textoFinal) || (
+                        <span className="text-white/30 dark:text-[#1a1a1a]/30 italic text-xs">
+                          Sua mensagem aparecerá aqui...
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>

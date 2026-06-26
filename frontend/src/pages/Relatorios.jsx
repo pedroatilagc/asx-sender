@@ -264,10 +264,10 @@ export default function Relatorios() {
         variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true }}
       >
         {[
-          { label: 'Campanhas',     value: campanhas.length,                           color: 'text-slate-700 dark:text-slate-200'     },
-          { label: 'Destinatários', value: totalDestinatarios.toLocaleString('pt-BR'), color: 'text-purple-600 dark:text-purple-400'   },
-          { label: 'Enviando',      value: totalEnviando,                              color: 'text-blue-600 dark:text-blue-400'        },
-          { label: 'Concluídas',    value: totalConcluidas,                            color: 'text-emerald-600 dark:text-emerald-400'  },
+          { label: 'Campanhas',     value: campanhas.length,                           color: 'text-slate-700 dark:text-slate-200' },
+          { label: 'Destinatários', value: totalDestinatarios.toLocaleString('pt-BR'), color: 'text-slate-700 dark:text-slate-200' },
+          { label: 'Enviando',      value: totalEnviando,                              color: 'text-slate-700 dark:text-slate-200' },
+          { label: 'Concluídas',    value: totalConcluidas,                            color: 'text-slate-700 dark:text-slate-200' },
         ].map(k => (
           <motion.div
             key={k.label}

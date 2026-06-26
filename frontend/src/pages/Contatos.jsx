@@ -353,9 +353,9 @@ export default function Contatos() {
         variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true }}
       >
         {[
-          { label: 'Total',   value: total,   color: 'text-slate-700 dark:text-slate-200'    },
-          { label: 'Ativos',  value: ativos,  color: 'text-emerald-600 dark:text-emerald-400' },
-          { label: 'Opt-out', value: optOuts, color: 'text-red-500 dark:text-red-400'         },
+          { label: 'Total',   value: total,   color: 'text-slate-700 dark:text-slate-200' },
+          { label: 'Ativos',  value: ativos,  color: 'text-slate-700 dark:text-slate-200' },
+          { label: 'Opt-out', value: optOuts, color: 'text-slate-700 dark:text-slate-200' },
         ].map(kpi => (
           <motion.div
             key={kpi.label}
