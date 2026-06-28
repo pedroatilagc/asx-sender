@@ -5,7 +5,7 @@ import {
   IconTemplate, IconPlus, IconPencil, IconTrash, IconX, IconLoader,
   IconSearch, IconExternalLink, IconBan, IconCopy
 } from '@tabler/icons-react'
-import { fadeUp, stagger, staggerItem } from '../lib/motion'
+import { stagger, staggerItem } from '../lib/motion'
 import ModalWrapper from '../components/ModalWrapper'
 
 const API = `${import.meta.env.VITE_API_URL}/api/modelos`
@@ -336,10 +336,7 @@ export default function Modelos() {
     <div className="space-y-6">
 
       {/* Header */}
-      <motion.div
-        className="flex items-center justify-between"
-        variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}
-      >
+      <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100">Modelos</h2>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Templates de mensagens para suas campanhas</p>
@@ -352,13 +349,10 @@ export default function Modelos() {
         >
           <IconPlus size={16} strokeWidth={2.5} /> Novo Modelo
         </motion.button>
-      </motion.div>
+      </div>
 
       {/* Filtros */}
-      <motion.div
-        className="flex items-center gap-3"
-        variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}
-      >
+      <div className="flex items-center gap-3">
         <div className="relative flex-1 max-w-sm">
           <IconSearch size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 pointer-events-none" />
           <input type="text" value={busca} onChange={e => setBusca(e.target.value)} placeholder="Buscar modelos..."
@@ -370,13 +364,10 @@ export default function Modelos() {
           <option value="texto">Texto</option>
           <option value="botoes">Botões</option>
         </select>
-      </motion.div>
+      </div>
 
       {/* Tabela */}
-      <motion.div
-        className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden"
-        variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true, margin: '-40px' }}
-      >
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
         <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-700">
           <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Lista de Modelos</h3>
         </div>
@@ -455,7 +446,7 @@ export default function Modelos() {
             </motion.tbody>
           </table>
         )}
-      </motion.div>
+      </div>
 
       <AnimatePresence>
         {modalAberto !== null && (

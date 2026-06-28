@@ -6,7 +6,7 @@ import {
   IconSearch, IconUpload, IconDownload, IconBan, IconCheck,
   IconAlertTriangle, IconFileSpreadsheet, IconCopy, IconCircleX
 } from '@tabler/icons-react'
-import { fadeUp, stagger, staggerItem, toastV } from '../lib/motion'
+import { toastV } from '../lib/motion'
 import ModalWrapper from '../components/ModalWrapper'
 
 const API = `${import.meta.env.VITE_API_URL}/api/contatos`
@@ -319,10 +319,7 @@ export default function Contatos() {
     <div className="space-y-6">
 
       {/* Header */}
-      <motion.div
-        className="flex items-center justify-between"
-        variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}
-      >
+      <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100">Contatos</h2>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Gerencie sua base de números WhatsApp</p>
@@ -345,35 +342,27 @@ export default function Contatos() {
             <IconPlus size={16} strokeWidth={2.5} /> Novo Contato
           </motion.button>
         </div>
-      </motion.div>
+      </div>
 
       {/* KPIs */}
-      <motion.div
-        className="grid grid-cols-3 gap-4"
-        variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true }}
-      >
+      <div className="grid grid-cols-3 gap-4">
         {[
           { label: 'Total',   value: total,   color: 'text-slate-700 dark:text-slate-200' },
           { label: 'Ativos',  value: ativos,  color: 'text-slate-700 dark:text-slate-200' },
           { label: 'Opt-out', value: optOuts, color: 'text-slate-700 dark:text-slate-200' },
         ].map(kpi => (
-          <motion.div
+          <div
             key={kpi.label}
-            variants={staggerItem}
-            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
             className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-4 cursor-default"
           >
             <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wide">{kpi.label}</p>
             <p className={`text-2xl font-bold mt-1 ${kpi.color}`}>{kpi.value}</p>
-          </motion.div>
+          </div>
         ))}
-      </motion.div>
+      </div>
 
       {/* Tabela */}
-      <motion.div
-        className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden"
-        variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true, margin: '-40px' }}
-      >
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
         <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center gap-3 flex-wrap">
           <div className="relative flex-1 min-w-[180px] max-w-xs">
             <IconSearch size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 pointer-events-none" />
@@ -486,7 +475,7 @@ export default function Contatos() {
             </tbody>
           </table>
         )}
-      </motion.div>
+      </div>
 
       <AnimatePresence>
         {modalNovo !== null && (

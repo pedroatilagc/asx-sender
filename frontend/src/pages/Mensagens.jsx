@@ -5,7 +5,7 @@ import {
   IconMessageCircle, IconLoader, IconSearch,
   IconRefresh, IconInbox, IconClock, IconDeviceMobile,
 } from '@tabler/icons-react'
-import { fadeUp, stagger, staggerItem } from '../lib/motion'
+import { stagger, staggerItem } from '../lib/motion'
 
 const API = `${import.meta.env.VITE_API_URL}/api/mensagens`
 
@@ -107,10 +107,7 @@ export default function Mensagens() {
     <div className="space-y-6">
 
       {/* Header */}
-      <motion.div
-        className="flex items-center justify-between"
-        variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}
-      >
+      <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100">Mensagens</h2>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Mensagens recebidas em tempo real</p>
@@ -130,34 +127,22 @@ export default function Mensagens() {
           </motion.span>
           Atualizar
         </motion.button>
-      </motion.div>
+      </div>
 
       {/* KPIs */}
-      <motion.div
-        className="grid grid-cols-2 gap-4 max-w-xs"
-        variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true }}
-      >
-        <motion.div
-          variants={staggerItem}
-          className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-4"
-        >
+      <div className="grid grid-cols-2 gap-4 max-w-xs">
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
           <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wide">Total</p>
           <p className="text-2xl font-bold mt-1 text-slate-700 dark:text-slate-200">{mensagens.length}</p>
-        </motion.div>
-        <motion.div
-          variants={staggerItem}
-          className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-4"
-        >
+        </div>
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
           <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wide">Últimas 24h</p>
           <p className="text-2xl font-bold mt-1 text-emerald-600 dark:text-emerald-400">{ultimas24}</p>
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
 
       {/* Filtros */}
-      <motion.div
-        className="flex items-center gap-3 flex-wrap"
-        variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}
-      >
+      <div className="flex items-center gap-3 flex-wrap">
         <div className="relative flex-1 min-w-[200px] max-w-sm">
           <IconSearch size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 pointer-events-none" />
           <input
@@ -180,13 +165,10 @@ export default function Mensagens() {
             ))}
           </select>
         )}
-      </motion.div>
+      </div>
 
       {/* Tabela */}
-      <motion.div
-        className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden"
-        variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true, margin: '-40px' }}
-      >
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
         <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <IconMessageCircle size={16} className="text-violet-500 dark:text-violet-400" strokeWidth={2} />
@@ -296,7 +278,7 @@ export default function Mensagens() {
             </motion.tbody>
           </table>
         )}
-      </motion.div>
+      </div>
     </div>
   )
 }

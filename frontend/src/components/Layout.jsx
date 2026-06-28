@@ -4,7 +4,7 @@ import axios from 'axios'
 import Sidebar from './Sidebar'
 import Header from './Header'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { pageV, toastV } from '../lib/motion'
+import { toastV } from '../lib/motion'
 import { IconMessageCircle } from '@tabler/icons-react'
 
 const API_MENSAGENS = `${import.meta.env.VITE_API_URL}/api/mensagens`
@@ -60,17 +60,9 @@ export default function Layout({ children }) {
       <div className="flex flex-1 overflow-hidden min-h-0">
         <Sidebar collapsed={collapsed} onToggle={() => setCollapsed(c => !c)} />
         <main className="flex-1 overflow-y-auto p-6 transition-colors duration-300">
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={location.pathname}
-              variants={pageV}
-              initial="hidden"
-              animate="show"
-              exit="exit"
-            >
-              {children}
-            </motion.div>
-          </AnimatePresence>
+          <div key={location.pathname}>
+            {children}
+          </div>
         </main>
       </div>
 

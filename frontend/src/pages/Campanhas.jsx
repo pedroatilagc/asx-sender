@@ -5,15 +5,16 @@ import {
   IconSend, IconPlus, IconUpload, IconLoader, IconX, IconCheck, IconAlertTriangle,
   IconPlayerPause, IconPlayerPlay, IconCircleX, IconSettings, IconRefresh,
   IconFileSpreadsheet, IconBolt, IconClock, IconUsers,
-  IconDeviceMobile, IconTemplate, IconPencil, IconTrash, IconEye
+  IconDeviceMobile, IconTemplate, IconPencil, IconTrash, IconEye, IconSearch
 } from '@tabler/icons-react'
-import { fadeUp, stagger, staggerItem, toastV } from '../lib/motion'
+import { toastV } from '../lib/motion'
 import ModalWrapper from '../components/ModalWrapper'
 
 const API      = `${import.meta.env.VITE_API_URL}/api/campanhas`
 const API_DISP = `${import.meta.env.VITE_API_URL}/api/dispositivos`
 const API_MOD  = `${import.meta.env.VITE_API_URL}/api/modelos`
 const API_CONF = `${import.meta.env.VITE_API_URL}/api/campanhas/configuracoes`
+const API_CONT = `${import.meta.env.VITE_API_URL}/api/contatos`
 
 function parseWhatsApp(texto) {
   if (!texto) return null
@@ -447,6 +448,11 @@ export default function Campanhas() {
   const [modalProgresso, setModalProgresso]         = useState(null)
   const [modalMapeamento, setModalMapeamento]       = useState(null)
   const [toast, setToast]                           = useState(null)
+  const [abaContatos, setAbaContatos]               = useState('planilha')
+  const [contatosDisponiveis, setContatosDisponiveis] = useState([])
+  const [loadingContatos, setLoadingContatos]         = useState(false)
+  const [buscaContatos, setBuscaContatos]             = useState('')
+  const [contatosSelecionados, setContatosSelecionados] = useState([])
 
   const fileInputRef = useRef(null)
   const textareaRef  = useRef(null)
@@ -462,6 +468,15 @@ export default function Campanhas() {
       const r = await axios.get(`${API}/`)
       setCampanhas(r.data)
     } finally { setLoadingHistorico(false) }
+  }
+
+  const carregarContatos = async () => {
+    setLoadingContatos(true)
+    try {
+      const r = await axios.get(`${API_CONT}/`, { params: { opt_out: 'false' } })
+      setContatosDisponiveis(r.data)
+    } catch {}
+    finally { setLoadingContatos(false) }
   }
 
   useEffect(() => {
@@ -550,10 +565,7 @@ export default function Campanhas() {
     <div className="space-y-6">
 
       {/* Header */}
-      <motion.div
-        className="flex items-center justify-between"
-        variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}
-      >
+      <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100">Nova Campanha</h2>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Configure e dispare sua campanha de WhatsApp</p>
@@ -563,13 +575,10 @@ export default function Campanhas() {
           className="flex items-center gap-2 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-sm font-medium px-4 py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
           <IconSettings size={15} /> Configurações
         </motion.button>
-      </motion.div>
+      </div>
 
       {/* ── Nova Campanha form ─────────────────────────────────────────────── */}
-      <motion.div
-        className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden"
-        variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}
-      >
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
         <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center gap-2">
           <IconPlus size={15} className="text-slate-400 dark:text-slate-500" />
           <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Nova Campanha</h3>
@@ -578,45 +587,239 @@ export default function Campanhas() {
         <div className="p-6 space-y-8">
 
           {/* PASSO 1 */}
-          <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true, margin: '-30px' }}>
+          <div>
             <p className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3 flex items-center gap-2">
-              <span className="w-6 h-6 rounded-full bg-primary text-white text-xs flex items-center justify-center font-bold flex-shrink-0">1</span>
-              Importar base de contatos
+              <span className="w-6 h-6 rounded-full bg-primary text-white text-xs flex items-center justify-center flex-shrink-0">1</span>
+              Base de contatos
             </p>
 
-            {uploadLoading ? (
-              <div className="border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl p-10 flex flex-col items-center gap-3">
-                <IconLoader size={28} className="animate-spin text-primary" />
-                <p className="text-sm text-slate-500 dark:text-slate-400">Processando arquivo...</p>
+            {/* Abas do passo 1 */}
+            {contatosImportados.length === 0 && (
+              <div className="flex mb-4 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden w-fit">
+                {[
+                  ['planilha', IconFileSpreadsheet, 'Importar planilha'],
+                  ['existentes', IconUsers, 'Contatos cadastrados'],
+                ].map(([v, Icon, lbl]) => (
+                  <button key={v} onClick={() => {
+                    setAbaContatos(v)
+                    if (v === 'existentes' && contatosDisponiveis.length === 0) carregarContatos()
+                  }}
+                    className={`flex items-center gap-1.5 text-xs font-medium px-4 py-2.5 transition-colors ${
+                      abaContatos === v ? 'bg-primary text-white' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
+                    }`}>
+                    <Icon size={13} /> {lbl}
+                  </button>
+                ))}
               </div>
-            ) : contatosImportados.length === 0 ? (
-              <div
-                onDragOver={e => { e.preventDefault(); setArrastando(true) }}
-                onDragLeave={() => setArrastando(false)}
-                onDrop={e => { e.preventDefault(); setArrastando(false); processarArquivo(e.dataTransfer.files[0]) }}
-                onClick={() => fileInputRef.current?.click()}
-                className={`border-2 border-dashed rounded-xl p-10 flex flex-col items-center gap-3 cursor-pointer transition-colors ${
-                  arrastando ? 'border-primary bg-primary/5' : 'border-slate-300 dark:border-slate-600 hover:border-primary/50 hover:bg-slate-50 dark:hover:bg-slate-800'
-                }`}
-              >
-                <input ref={fileInputRef} type="file" accept=".csv,.xlsx,.xls" className="hidden"
-                  onChange={e => { processarArquivo(e.target.files[0]); e.target.value = '' }} />
-                <IconFileSpreadsheet size={36} className="text-slate-300 dark:text-slate-600" />
-                <div className="text-center">
-                  <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">Arraste CSV ou XLSX aqui</p>
-                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">ou clique para selecionar — colunas "nome" e "numero"</p>
+            )}
+
+            {/* ABA PLANILHA — comportamento original intacto */}
+            {abaContatos === 'planilha' && (
+              <>
+                {uploadLoading ? (
+                  <div className="border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl p-10 flex flex-col items-center gap-3">
+                    <IconLoader size={28} className="animate-spin text-primary" />
+                    <p className="text-sm text-slate-500 dark:text-slate-400">Processando arquivo...</p>
+                  </div>
+                ) : contatosImportados.length === 0 ? (
+                  <div
+                    onDragOver={e => { e.preventDefault(); setArrastando(true) }}
+                    onDragLeave={() => setArrastando(false)}
+                    onDrop={e => { e.preventDefault(); setArrastando(false); processarArquivo(e.dataTransfer.files[0]) }}
+                    onClick={() => fileInputRef.current?.click()}
+                    className={`border-2 border-dashed rounded-xl p-10 flex flex-col items-center gap-3 cursor-pointer transition-colors ${
+                      arrastando ? 'border-primary bg-primary/5' : 'border-slate-300 dark:border-slate-600 hover:border-primary/50 hover:bg-slate-50 dark:hover:bg-slate-800'
+                    }`}
+                  >
+                    <input ref={fileInputRef} type="file" accept=".csv,.xlsx,.xls" className="hidden"
+                      onChange={e => { processarArquivo(e.target.files[0]); e.target.value = '' }} />
+                    <IconFileSpreadsheet size={36} className="text-slate-300 dark:text-slate-600" />
+                    <div className="text-center">
+                      <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">Arraste CSV ou XLSX aqui</p>
+                      <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">ou clique para selecionar — colunas "nome" e "numero"</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <p className="text-sm text-slate-600 dark:text-slate-300">
+                        <span className="font-semibold text-emerald-600 dark:text-emerald-400">{contatosImportados.length}</span> contatos importados
+                        {invalidos > 0 && <span className="text-red-500 dark:text-red-400 ml-2">· {invalidos} inválidos ignorados</span>}
+                      </p>
+                      <button onClick={() => { setContatosImportados([]); setInvalidos(0) }}
+                        className="text-xs text-primary hover:underline font-medium flex items-center gap-1">
+                        <IconUpload size={12} /> Trocar arquivo
+                      </button>
+                    </div>
+                    <div className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden max-h-52 overflow-y-auto">
+                      <table className="w-full">
+                        <thead className="sticky top-0 bg-slate-50 dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700">
+                          <tr>
+                            {['#', 'Nome', 'Número'].map(h => (
+                              <th key={h} className="text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide px-4 py-2.5">{h}</th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
+                          {contatosImportados.slice(0, 200).map((c, i) => (
+                            <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800">
+                              <td className="px-4 py-2 text-xs text-slate-400 dark:text-slate-500 font-mono">{i + 1}</td>
+                              <td className="px-4 py-2 text-sm text-slate-700 dark:text-slate-200">{c.nome || <span className="italic text-slate-400">—</span>}</td>
+                              <td className="px-4 py-2 text-sm font-mono text-slate-600 dark:text-slate-300">{c.numero}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* ABA CONTATOS EXISTENTES */}
+            {abaContatos === 'existentes' && contatosImportados.length === 0 && (
+              <div className="space-y-3">
+                {/* Barra de busca + ações */}
+                <div className="flex items-center gap-3">
+                  <div className="relative flex-1">
+                    <IconSearch size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <input
+                      type="text"
+                      placeholder="Buscar por nome ou número..."
+                      value={buscaContatos}
+                      onChange={e => setBuscaContatos(e.target.value)}
+                      className="w-full pl-8 pr-3 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-lg outline-none focus:border-primary bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400"
+                    />
+                  </div>
+                  <button
+                    onClick={() => setContatosSelecionados(
+                      contatosDisponiveis
+                        .filter(c => !c.opt_out && (
+                          !buscaContatos ||
+                          c.nome?.toLowerCase().includes(buscaContatos.toLowerCase()) ||
+                          c.numero.includes(buscaContatos)
+                        ))
+                        .map(c => ({ nome: c.nome, numero: c.numero }))
+                    )}
+                    className="text-xs text-primary font-medium hover:underline whitespace-nowrap"
+                  >
+                    Selecionar todos
+                  </button>
+                  <span className="text-slate-300 dark:text-slate-600">·</span>
+                  <button onClick={() => setContatosSelecionados([])}
+                    className="text-xs text-slate-500 dark:text-slate-400 font-medium hover:underline whitespace-nowrap">
+                    Desmarcar
+                  </button>
                 </div>
+
+                {/* Lista de contatos */}
+                {loadingContatos ? (
+                  <div className="flex items-center justify-center py-10 text-slate-400">
+                    <IconLoader size={20} className="animate-spin mr-2" />
+                    <span className="text-sm">Carregando contatos...</span>
+                  </div>
+                ) : contatosDisponiveis.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-10 text-slate-400 gap-2">
+                    <IconUsers size={32} strokeWidth={1} />
+                    <p className="text-sm">Nenhum contato cadastrado.</p>
+                  </div>
+                ) : (
+                  <div className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden max-h-64 overflow-y-auto">
+                    <table className="w-full">
+                      <thead className="sticky top-0 bg-slate-50 dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700">
+                        <tr>
+                          <th className="w-10 px-4 py-2.5">
+                            <input type="checkbox"
+                              checked={contatosSelecionados.length === contatosDisponiveis.filter(c =>
+                                !buscaContatos ||
+                                c.nome?.toLowerCase().includes(buscaContatos.toLowerCase()) ||
+                                c.numero.includes(buscaContatos)
+                              ).length && contatosSelecionados.length > 0}
+                              onChange={e => {
+                                const filtrados = contatosDisponiveis.filter(c =>
+                                  !buscaContatos ||
+                                  c.nome?.toLowerCase().includes(buscaContatos.toLowerCase()) ||
+                                  c.numero.includes(buscaContatos)
+                                )
+                                setContatosSelecionados(e.target.checked ? filtrados.map(c => ({ nome: c.nome, numero: c.numero })) : [])
+                              }}
+                              className="rounded border-slate-300 text-primary"
+                            />
+                          </th>
+                          {['Nome', 'Número'].map(h => (
+                            <th key={h} className="text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide px-4 py-2.5">{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
+                        {contatosDisponiveis
+                          .filter(c =>
+                            !buscaContatos ||
+                            c.nome?.toLowerCase().includes(buscaContatos.toLowerCase()) ||
+                            c.numero.includes(buscaContatos)
+                          )
+                          .map(c => {
+                            const sel = contatosSelecionados.some(x => x.numero === c.numero)
+                            return (
+                              <tr key={c.id}
+                                onClick={() => setContatosSelecionados(prev =>
+                                  sel ? prev.filter(x => x.numero !== c.numero) : [...prev, { nome: c.nome, numero: c.numero }]
+                                )}
+                                className={`cursor-pointer transition-colors ${sel ? 'bg-primary/5 dark:bg-primary/10' : 'hover:bg-slate-50 dark:hover:bg-slate-800'}`}
+                              >
+                                <td className="w-10 px-4 py-2.5">
+                                  <input type="checkbox" checked={sel} readOnly
+                                    className="rounded border-slate-300 text-primary pointer-events-none" />
+                                </td>
+                                <td className="px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200">
+                                  {c.nome || <span className="italic text-slate-400">—</span>}
+                                </td>
+                                <td className="px-4 py-2.5 text-sm font-mono text-slate-600 dark:text-slate-300">{c.numero}</td>
+                              </tr>
+                            )
+                          })
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+
+                {/* Confirmar seleção */}
+                {contatosSelecionados.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex items-center justify-between bg-primary/5 dark:bg-primary/10 border border-primary/20 rounded-xl px-4 py-3"
+                  >
+                    <p className="text-sm text-primary font-medium">
+                      <span className="font-bold">{contatosSelecionados.length}</span> contatos selecionados
+                    </p>
+                    <motion.button
+                      whileTap={{ scale: 0.97 }}
+                      onClick={() => {
+                        setContatosImportados(contatosSelecionados)
+                        setContatosSelecionados([])
+                        setBuscaContatos('')
+                      }}
+                      className="bg-primary text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors flex items-center gap-2"
+                    >
+                      <IconCheck size={14} /> Usar esses contatos
+                    </motion.button>
+                  </motion.div>
+                )}
               </div>
-            ) : (
+            )}
+
+            {/* Estado após selecionar contatos existentes */}
+            {abaContatos === 'existentes' && contatosImportados.length > 0 && (
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <p className="text-sm text-slate-600 dark:text-slate-300">
-                    <span className="font-semibold text-emerald-600 dark:text-emerald-400">{contatosImportados.length}</span> contatos importados
-                    {invalidos > 0 && <span className="text-red-500 dark:text-red-400 ml-2">· {invalidos} inválidos ignorados</span>}
+                    <span className="font-semibold text-emerald-600 dark:text-emerald-400">{contatosImportados.length}</span> contatos selecionados
                   </p>
-                  <button onClick={() => { setContatosImportados([]); setInvalidos(0) }}
+                  <button onClick={() => { setContatosImportados([]); setInvalidos(0); setContatosSelecionados([]) }}
                     className="text-xs text-primary hover:underline font-medium flex items-center gap-1">
-                    <IconUpload size={12} /> Trocar arquivo
+                    <IconUsers size={12} /> Mudar seleção
                   </button>
                 </div>
                 <div className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden max-h-52 overflow-y-auto">
@@ -631,8 +834,8 @@ export default function Campanhas() {
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
                       {contatosImportados.slice(0, 200).map((c, i) => (
                         <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800">
-                          <td className="px-4 py-2 text-xs text-slate-400 dark:text-slate-500 font-mono">{i + 1}</td>
-                          <td className="px-4 py-2 text-sm text-slate-700 dark:text-slate-200">{c.nome || <span className="italic text-slate-400 dark:text-slate-500">—</span>}</td>
+                          <td className="px-4 py-2 text-xs text-slate-400 font-mono">{i + 1}</td>
+                          <td className="px-4 py-2 text-sm text-slate-700 dark:text-slate-200">{c.nome || <span className="italic text-slate-400">—</span>}</td>
                           <td className="px-4 py-2 text-sm font-mono text-slate-600 dark:text-slate-300">{c.numero}</td>
                         </tr>
                       ))}
@@ -641,11 +844,12 @@ export default function Campanhas() {
                 </div>
               </div>
             )}
+
             {erros.contatos && <p className="text-xs text-red-500 mt-2">{erros.contatos}</p>}
-          </motion.div>
+          </div>
 
           {/* PASSO 2 */}
-          <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true, margin: '-30px' }}>
+          <div>
             <p className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3 flex items-center gap-2">
               <span className="w-6 h-6 rounded-full bg-primary text-white text-xs flex items-center justify-center font-bold flex-shrink-0">2</span>
               Configurar mensagem
@@ -716,10 +920,10 @@ export default function Campanhas() {
               </div>
             </div>
             {erros.mensagem && <p className="text-xs text-red-500 mt-2">{erros.mensagem}</p>}
-          </motion.div>
+          </div>
 
           {/* PASSO 3 */}
-          <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true, margin: '-30px' }}>
+          <div>
             <p className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3 flex items-center gap-2">
               <span className="w-6 h-6 rounded-full bg-primary text-white text-xs flex items-center justify-center font-bold flex-shrink-0">3</span>
               Selecionar instâncias WhatsApp
@@ -739,16 +943,12 @@ export default function Campanhas() {
                   <button onClick={() => setInstanciasSelecionadas([])}
                     className="text-xs text-slate-500 dark:text-slate-400 hover:underline font-medium">Desmarcar todas</button>
                 </div>
-                <motion.div
-                  className="grid grid-cols-3 gap-3"
-                  variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true }}
-                >
+                <div className="grid grid-cols-3 gap-3">
                   {conectadas.map(d => {
                     const sel = instanciasSelecionadas.some(x => x.id === d.id)
                     return (
                       <motion.div
                         key={d.id}
-                        variants={staggerItem}
                         whileTap={{ scale: 0.97 }}
                         onClick={() => toggleInstancia(d)}
                         className={`relative border-2 rounded-xl p-4 cursor-pointer transition-colors ${
@@ -769,14 +969,14 @@ export default function Campanhas() {
                       </motion.div>
                     )
                   })}
-                </motion.div>
+                </div>
               </>
             )}
             {erros.instancias && <p className="text-xs text-red-500 mt-2">{erros.instancias}</p>}
-          </motion.div>
+          </div>
 
           {/* PASSO 4 */}
-          <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true, margin: '-30px' }}>
+          <div>
             <p className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3 flex items-center gap-2">
               <span className="w-6 h-6 rounded-full bg-primary text-white text-xs flex items-center justify-center font-bold flex-shrink-0">4</span>
               Finalizar e disparar
@@ -803,12 +1003,12 @@ export default function Campanhas() {
               </div>
 
               {agendar && (
-                <motion.div variants={fadeUp} initial="hidden" animate="show">
+                <div>
                   <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">Data e hora</label>
                   <input type="datetime-local" value={dataAgendamento} onChange={e => setDataAgendamento(e.target.value)}
                     className="w-full border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2.5 text-sm outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary/20" />
                   {erros.agendamento && <p className="text-xs text-red-500 mt-1">{erros.agendamento}</p>}
-                </motion.div>
+                </div>
               )}
 
               <motion.button
@@ -825,10 +1025,10 @@ export default function Campanhas() {
                 }
               </motion.button>
             </div>
-          </motion.div>
+          </div>
 
         </div>
-      </motion.div>
+      </div>
 
       <AnimatePresence>
         {modalConfig && <ModalConfiguracoes key="modal-config" onClose={() => setModalConfig(false)} />}

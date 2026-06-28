@@ -6,21 +6,23 @@ export default function ModalWrapper({ children, onClose, maxWidth = '448px' }) 
     <motion.div
       variants={backdropV} initial="hidden" animate="show" exit="exit"
       onClick={onClose}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto"
+      className="fixed inset-0 z-100 overflow-y-auto"
       style={{
         backgroundColor: 'rgba(15, 17, 23, 0.55)',
         backdropFilter: 'blur(6px)',
         WebkitBackdropFilter: 'blur(6px)',
       }}
     >
-      <motion.div
-        variants={modalV} initial="hidden" animate="show" exit="exit"
-        onClick={e => e.stopPropagation()}
-        className="w-full my-auto"
-        style={{ maxWidth }}
-      >
-        {children}
-      </motion.div>
+      <div className="flex min-h-full items-center justify-center p-4">
+        <motion.div
+          variants={modalV} initial="hidden" animate="show" exit="exit"
+          onClick={e => e.stopPropagation()}
+          className="w-full"
+          style={{ maxWidth }}
+        >
+          {children}
+        </motion.div>
+      </div>
     </motion.div>
   )
 }

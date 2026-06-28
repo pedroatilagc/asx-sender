@@ -6,7 +6,7 @@ import {
   IconPlayerPause, IconPlayerPlay, IconCircleX, IconRefresh,
   IconX, IconCheck, IconAlertTriangle,
 } from '@tabler/icons-react'
-import { fadeUp, stagger, staggerItem, toastV } from '../lib/motion'
+import { stagger, staggerItem, toastV } from '../lib/motion'
 import ModalWrapper from '../components/ModalWrapper'
 
 const API = `${import.meta.env.VITE_API_URL}/api/campanhas`
@@ -73,12 +73,12 @@ function ModalProgresso({ campanha: campanhaInicial, onClose, onAtualizar }) {
   const pct = campanha.porcentagem ?? 0
 
   return (
-    <ModalWrapper onClose={onClose} maxWidth="672px">
+    <ModalWrapper onClose={onClose} maxWidth="1100px">
       <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full">
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700">
           <div className="flex items-center gap-3 min-w-0">
-            <h3 className="text-base font-semibold text-slate-800 dark:text-slate-100 truncate">{campanha.nome}</h3>
-            <span className={`flex-shrink-0 inline-flex items-center text-xs font-medium px-2.5 py-1 rounded-full border ${STATUS_BADGE[campanha.status] || STATUS_BADGE.rascunho} ${campanha.status === 'enviando' ? 'animate-pulse' : ''}`}>
+            <h3 className="text-xl font-semibold text-slate-800 dark:text-slate-100 truncate">{campanha.nome}</h3>
+            <span className={`flex-shrink-0 inline-flex items-center text-sm font-medium px-3 py-1 rounded-full border ${STATUS_BADGE[campanha.status] || STATUS_BADGE.rascunho} ${campanha.status === 'enviando' ? 'animate-pulse' : ''}`}>
               {STATUS_LABEL[campanha.status] || campanha.status}
             </span>
           </div>
@@ -88,8 +88,8 @@ function ModalProgresso({ campanha: campanhaInicial, onClose, onAtualizar }) {
           </motion.button>
         </div>
 
-        <div className="px-6 py-4 space-y-4">
-          <div className="grid grid-cols-5 gap-3">
+        <div className="px-8 py-6 space-y-6">
+          <div className="grid grid-cols-5 gap-4">
             {[
               { label: 'Total',     value: campanha.total,    color: 'text-slate-700 dark:text-slate-200'    },
               { label: 'Enviados',  value: campanha.enviados, color: 'text-emerald-600 dark:text-emerald-400' },
@@ -97,16 +97,16 @@ function ModalProgresso({ campanha: campanhaInicial, onClose, onAtualizar }) {
               { label: 'Pulados',   value: campanha.pulados,  color: 'text-amber-600 dark:text-amber-400'     },
               { label: 'Progresso', value: `${pct}%`,         color: 'text-primary'                          },
             ].map(k => (
-              <div key={k.label} className="bg-slate-50 dark:bg-slate-800 rounded-lg p-3 text-center">
-                <p className={`text-xl font-bold ${k.color}`}>{k.value}</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{k.label}</p>
+              <div key={k.label} className="bg-slate-50 dark:bg-slate-800 rounded-xl p-5 text-center">
+                <p className={`text-3xl font-bold ${k.color}`}>{k.value}</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{k.label}</p>
               </div>
             ))}
           </div>
 
-          <div className="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2.5 overflow-hidden">
+          <div className="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-4 overflow-hidden">
             <motion.div
-              className="bg-emerald-500 h-2.5 rounded-full"
+              className="bg-emerald-500 h-4 rounded-full"
               initial={{ width: 0 }}
               animate={{ width: `${pct}%` }}
               transition={{ duration: 0.6, ease: 'easeOut' }}
@@ -117,22 +117,22 @@ function ModalProgresso({ campanha: campanhaInicial, onClose, onAtualizar }) {
             {campanha.status === 'enviando' && (
               <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
                 onClick={() => controle('pausar')} disabled={ctrl}
-                className="flex items-center gap-2 border border-amber-300 dark:border-amber-700 text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/40 text-sm font-medium px-4 py-2 rounded-lg transition-colors disabled:opacity-50">
-                <IconPlayerPause size={15} /> Pausar
+                className="flex items-center gap-2 border border-amber-300 dark:border-amber-700 text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/40 text-base font-medium px-5 py-2.5 rounded-lg transition-colors disabled:opacity-50">
+                <IconPlayerPause size={18} /> Pausar
               </motion.button>
             )}
             {campanha.status === 'pausada' && (
               <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
                 onClick={() => controle('retomar')} disabled={ctrl}
-                className="flex items-center gap-2 border border-emerald-300 dark:border-emerald-700 text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 text-sm font-medium px-4 py-2 rounded-lg transition-colors disabled:opacity-50">
-                <IconPlayerPlay size={15} /> Retomar
+                className="flex items-center gap-2 border border-emerald-300 dark:border-emerald-700 text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 text-base font-medium px-5 py-2.5 rounded-lg transition-colors disabled:opacity-50">
+                <IconPlayerPlay size={18} /> Retomar
               </motion.button>
             )}
             {!['concluida', 'cancelada'].includes(campanha.status) && (
               <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
                 onClick={() => controle('cancelar')} disabled={ctrl}
-                className="flex items-center gap-2 border border-red-300 dark:border-red-700 text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 text-sm font-medium px-4 py-2 rounded-lg transition-colors disabled:opacity-50">
-                <IconCircleX size={15} /> Cancelar
+                className="flex items-center gap-2 border border-red-300 dark:border-red-700 text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 text-base font-medium px-5 py-2.5 rounded-lg transition-colors disabled:opacity-50">
+                <IconCircleX size={18} /> Cancelar
               </motion.button>
             )}
             <button onClick={atualizar}
@@ -142,12 +142,12 @@ function ModalProgresso({ campanha: campanhaInicial, onClose, onAtualizar }) {
           </div>
 
           <div className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
-            <div className="max-h-64 overflow-y-auto">
+            <div className="max-h-96 overflow-y-auto">
               <table className="w-full">
                 <thead className="sticky top-0 bg-slate-50 dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700">
                   <tr>
                     {['Nome', 'Número', 'Instância', 'Status', 'Enviado em'].map(h => (
-                      <th key={h} className="text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide px-4 py-2.5">{h}</th>
+                      <th key={h} className="text-left text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide px-5 py-3.5">{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -158,15 +158,15 @@ function ModalProgresso({ campanha: campanhaInicial, onClose, onAtualizar }) {
                     </td></tr>
                   ) : contatos.map(c => (
                     <tr key={c.id} className="hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                      <td className="px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200">{c.nome || <span className="italic text-slate-400 dark:text-slate-500">—</span>}</td>
-                      <td className="px-4 py-2.5 text-sm font-mono text-slate-600 dark:text-slate-300">{c.numero}</td>
-                      <td className="px-4 py-2.5 text-xs text-slate-500 dark:text-slate-400">{c.instancia || '—'}</td>
-                      <td className="px-4 py-2.5">
-                        <span className={`inline-flex text-xs font-medium px-2 py-0.5 rounded-full border ${STATUS_CONTATO_BADGE[c.status] || STATUS_CONTATO_BADGE.pendente}`}>
+                      <td className="px-5 py-3.5 text-base text-slate-700 dark:text-slate-200">{c.nome || <span className="italic text-slate-400 dark:text-slate-500">—</span>}</td>
+                      <td className="px-5 py-3.5 text-base font-mono text-slate-600 dark:text-slate-300">{c.numero}</td>
+                      <td className="px-5 py-3.5 text-sm text-slate-500 dark:text-slate-400">{c.instancia || '—'}</td>
+                      <td className="px-5 py-3.5">
+                        <span className={`inline-flex text-sm font-medium px-3 py-1 rounded-full border ${STATUS_CONTATO_BADGE[c.status] || STATUS_CONTATO_BADGE.pendente}`}>
                           {c.status}
                         </span>
                       </td>
-                      <td className="px-4 py-2.5 text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">{formatarData(c.enviado_em)}</td>
+                      <td className="px-5 py-3.5 text-sm text-slate-500 dark:text-slate-400 whitespace-nowrap">{formatarData(c.enviado_em)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -175,9 +175,9 @@ function ModalProgresso({ campanha: campanhaInicial, onClose, onAtualizar }) {
           </div>
         </div>
 
-        <div className="px-6 py-4 border-t border-slate-100 dark:border-slate-700">
+        <div className="px-8 py-5 border-t border-slate-100 dark:border-slate-700">
           <button onClick={onClose}
-            className="w-full border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-sm font-medium py-2.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+            className="w-full border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-base font-medium py-3.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
             Fechar
           </button>
         </div>
@@ -243,10 +243,7 @@ export default function Relatorios() {
     <div className="space-y-6">
 
       {/* Header */}
-      <motion.div
-        className="flex items-center justify-between"
-        variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}
-      >
+      <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100">Relatórios</h2>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Acompanhe o desempenho das suas campanhas</p>
@@ -256,36 +253,28 @@ export default function Relatorios() {
           className="flex items-center gap-2 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-sm font-medium px-4 py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
           <IconRefresh size={15} /> Atualizar
         </motion.button>
-      </motion.div>
+      </div>
 
       {/* KPIs */}
-      <motion.div
-        className="grid grid-cols-4 gap-4"
-        variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true }}
-      >
+      <div className="grid grid-cols-4 gap-4">
         {[
           { label: 'Campanhas',     value: campanhas.length,                           color: 'text-slate-700 dark:text-slate-200' },
           { label: 'Destinatários', value: totalDestinatarios.toLocaleString('pt-BR'), color: 'text-slate-700 dark:text-slate-200' },
           { label: 'Enviando',      value: totalEnviando,                              color: 'text-slate-700 dark:text-slate-200' },
           { label: 'Concluídas',    value: totalConcluidas,                            color: 'text-slate-700 dark:text-slate-200' },
         ].map(k => (
-          <motion.div
+          <div
             key={k.label}
-            variants={staggerItem}
-            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
             className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-5 cursor-default"
           >
             <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">{k.label}</p>
             <p className={`text-2xl font-bold ${k.color}`}>{k.value}</p>
-          </motion.div>
+          </div>
         ))}
-      </motion.div>
+      </div>
 
       {/* Tabela */}
-      <motion.div
-        className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden"
-        variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true, margin: '-40px' }}
-      >
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
         <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center gap-3">
           <div className="relative flex-1 max-w-xs">
             <IconSearch size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
@@ -392,7 +381,7 @@ export default function Relatorios() {
             </table>
           </div>
         )}
-      </motion.div>
+      </div>
 
       <AnimatePresence>
         {modalProgresso && (
