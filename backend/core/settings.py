@@ -5,8 +5,7 @@ import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = config('SECRET_KEY')
-DEBUG = config('DEBUG', default=True, cast=bool)
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-dev-only-key-change-in-production')DEBUG = config('DEBUG', default=True, cast=bool)
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 INSTALLED_APPS = [
@@ -83,12 +82,7 @@ REST_FRAMEWORK = {
     ],
 }
 
-SUPABASE_URL = config('SUPABASE_URL')
-SUPABASE_KEY = config('SUPABASE_KEY')
-EVOLUTION_API_URL = config('EVOLUTION_API_URL')
-EVOLUTION_API_KEY = config('EVOLUTION_API_KEY')
-UAZAPI_URL = 'https://free.uazapi.com'
-UAZAPI_ADMIN_TOKEN = 'ZaW1qwTEkuq7Ub1cBUuyMiK5bNSu3nnMQ9lh7klElc2clSRV8t'
-
+UAZAPI_URL         = os.environ.get('UAZAPI_URL', 'https://free.uazapi.com')
+UAZAPI_ADMIN_TOKEN = os.environ.get('UAZAPI_ADMIN_TOKEN', '')
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
