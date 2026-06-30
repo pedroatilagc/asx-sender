@@ -23,12 +23,8 @@ from contatos.models import Contato
 
 from django.conf import settings
 
-EVOLUTION_URL = settings.EVOLUTION_API_URL
-EVOLUTION_KEY = settings.EVOLUTION_API_KEY
-HEADERS = {'apikey': EVOLUTION_KEY, 'Content-Type': 'application/json'}
 UAZAPI_URL_CAMPANHAS = settings.UAZAPI_URL
 
-# Controle de threads por campanha
 _threads = {}
 _paused  = {}
 _stopped = {}
